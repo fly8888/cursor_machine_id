@@ -75,33 +75,37 @@ def update_main_js(file_path):
 
     try:
         # 读取文件内容
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
         system = platform.system().lower()
-        if system == 'darwin':
-            # macOS: 替换 ioreg 命令
+        if system == 'windows':
+            # Windows: 替换 REG.exe 命令
+            # Using the exact pattern found in the file
+            old_cmd = r'`${y5[n$()]}\\REG.exe QUERY HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Cryptography /v MachineGuid`'
+            new_cmd = r'`powershell -Command "[guid]::NewGuid().ToString().ToLower()"`'
+            new_content = content.replace(old_cmd, new_cmd)
+            
+            if old_cmd not in content:
+                print('警告: 未找到原始命令模式')
+                return False
+        elif system == 'darwin':
+            # Keep existing macOS logic
             new_content = re.sub(
                 r'ioreg -rd1 -c IOPlatformExpertDevice',
                 'UUID=$(uuidgen | tr \'[:upper:]\' \'[:lower:]\');echo \\"IOPlatformUUID = \\"$UUID\\";',
                 content
             )
-        elif system == 'windows':
-            # Windows: 替换 REG.exe 命令
-            # 注意：这里使用三重引号来处理复杂的转义
-            old_cmd = r'${v5[s$()]}\\REG.exe QUERY HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Cryptography /v MachineGuid'
-            new_cmd = r'powershell -Command "[guid]::NewGuid().ToString().ToLower()"'
-            new_content = content.replace(old_cmd, new_cmd)
         else:
             print('警告: 不支持的操作系统')
             return False
 
         # 写入修改后的内容
-        with open(file_path, 'w') as f:
+        with open(file_path, 'w', encoding='utf-8') as f:
             f.write(new_content)
 
         # 验证修改
-        success_marker = 'UUID=$(uuidgen | tr \'[:upper:]\' \'[:lower:]\');echo \\"IOPlatformUUID = \\"$UUID\\";' if system == 'darwin' else 'powershell -Command "[guid]::NewGuid().ToString().ToLower()"'
+        success_marker = new_cmd if system == 'windows' else 'UUID=$(uuidgen'
         if success_marker in new_content:
             print('main.js 文件修改成功')
             return True
