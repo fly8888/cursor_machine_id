@@ -6,6 +6,8 @@ mac_change_id.sh 支持 MacOS Cursor 0.45.x版本,其它平台暂不支持。
 
 <span style="color: red"><strong>⚠️ 注意：如果重试后无效，请删除账号重新注册，并且重置设备id 重启Cursor。</strong></span>
 
+
+
 ## 功能特性
 
 - ✨ 支持 Windows(change_cursor_id.py 支持0.45.x)、macOS(change_cursor_id.py、mac_change_id.sh 支持0.45.x) 和 Linux 系统
